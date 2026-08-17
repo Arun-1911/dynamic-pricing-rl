@@ -1,0 +1,52 @@
+Evaluating on 727 held-out products, 10 episodes each
+  evaluated 100/727 products...
+  evaluated 200/727 products...
+  evaluated 300/727 products...
+  evaluated 400/727 products...
+  evaluated 500/727 products...
+  evaluated 600/727 products...
+  evaluated 700/727 products...
+
+=== RESULTS ===
+{
+  "ppo": {
+    "mean_revenue_per_product": 953.4948790068546,
+    "std_revenue_per_product": 1870.0749132278008,
+    "total_revenue": 693190.7770379826,
+    "mean_profit_per_product": 595.9572001711551,
+    "std_profit_per_product": 1162.746735690954,
+    "total_profit": 433260.8845244296
+  },
+  "static_base_price": {
+    "mean_revenue_per_product": 719.4951823444007,
+    "std_revenue_per_product": 1440.9827086177456,
+    "total_revenue": 523072.9975643796,
+    "mean_profit_per_product": 359.7475911722004,
+    "std_profit_per_product": 720.4913543088728,
+    "total_profit": 261536.4987821898,
+    "revenue_uplift_vs_ppo_pct": 32.52276073621349,
+    "profit_uplift_vs_ppo_pct": 65.65981671462751
+  },
+  "undercut_competitor_5pct": {
+    "mean_revenue_per_product": 684.9142243770189,
+    "std_revenue_per_product": 1381.9722540809614,
+    "total_revenue": 497932.6411220924,
+    "mean_profit_per_product": 325.1691721304992,
+    "std_profit_per_product": 661.8096626608332,
+    "total_profit": 236397.9881388727,
+    "revenue_uplift_vs_ppo_pct": 39.2137650337354,
+    "profit_uplift_vs_ppo_pct": 83.27604559388604
+  },
+  "elasticity_optimal_static": {
+    "mean_revenue_per_product": 606.8818252921616,
+    "std_revenue_per_product": 1160.5742383804456,
+    "total_revenue": 441203.086987401,
+    "mean_profit_per_product": 247.1342341199612,
+    "std_profit_per_product": 468.21969462848995,
+    "total_profit": 179666.58820521215,
+    "revenue_uplift_vs_ppo_pct": 57.11376404258417,
+    "profit_uplift_vs_ppo_pct": 141.14716534248782
+  },
+  "n_held_out_products": 727,
+  "episodes_per_product": 10
+}

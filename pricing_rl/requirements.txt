@@ -1,0 +1,10 @@
+gymnasium==1.2.3
+stable-baselines3==2.7.1
+shap==0.51.0
+streamlit==1.55.0
+scikit-learn==1.8.0
+matplotlib==3.10.8
+pandas==2.3.3
+numpy>=1.26
+openpyxl==3.1.5
+torch==2.10.0
