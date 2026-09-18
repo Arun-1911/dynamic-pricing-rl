@@ -6,6 +6,7 @@ import {
   BarChart,
   Bar,
   XAxis,
+  YAxis,
   ResponsiveContainer,
   Tooltip,
   Cell,
@@ -15,7 +16,7 @@ import SpotlightCard from "../components/SpotlightCard";
 import AnimatedNumber from "../components/AnimatedNumber";
 import PageTransition from "../components/PageTransition";
 
-const CATEGORY_COLORS = ["#22d3ee", "#a78bfa", "#f472b6", "#34d399", "#fbbf24", "#fb7185"];
+const CATEGORY_COLORS = ["#7a1b31", "#a8445b", "#c97b8c", "#a9812e", "#6b5348", "#8c6e52"];
 
 export default function Overview() {
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -47,11 +48,11 @@ export default function Overview() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 text-[12px] font-medium text-[var(--text-dim)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 pulse-glow" />
+          <span className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-white px-3.5 py-1.5 text-[12px] font-medium text-[var(--text-dim)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--green)] pulse-glow" />
             PPO policy live &middot; trained on real transaction data
           </span>
-          <h1 className="font-display mx-auto max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-white sm:text-6xl">
+          <h1 className="font-display mx-auto max-w-4xl text-5xl font-semibold leading-[1.08] tracking-tight text-[var(--text)] sm:text-6xl">
             Dynamic pricing,
             <br />
             <span className="text-gradient">reinforced.</span>
@@ -64,14 +65,14 @@ export default function Overview() {
           <div className="mt-9 flex items-center justify-center gap-3">
             <Link
               to="/explore"
-              className="group flex items-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400 px-5 py-2.5 text-[13px] font-semibold text-black transition-transform hover:scale-[1.03]"
+              className="group flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[var(--burgundy)] to-[var(--burgundy-dark)] px-5 py-2.5 text-[13px] font-semibold text-white shadow-[0_4px_16px_rgba(122,27,49,0.28)] transition-transform hover:scale-[1.03]"
             >
               Explore products
               <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
             <Link
               to="/training"
-              className="rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-white/[0.07]"
+              className="rounded-full border border-[var(--border)] bg-white px-5 py-2.5 text-[13px] font-medium text-[var(--text)] transition-colors hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)]"
             >
               View training results
             </Link>
@@ -87,14 +88,14 @@ export default function Overview() {
             label: "Real products",
             value: summary?.n_products ?? 0,
             suffix: "",
-            color: "text-cyan-300",
+            color: "text-[var(--burgundy)]",
           },
           {
             icon: FlaskConical,
             label: "Held-out test set",
             value: summary?.n_test ?? 0,
             suffix: "",
-            color: "text-violet-300",
+            color: "text-[var(--gold)]",
           },
           {
             icon: TrendingUp,
@@ -102,7 +103,7 @@ export default function Overview() {
             value: revenueUplift,
             suffix: "%",
             decimals: 1,
-            color: "text-emerald-300",
+            color: "text-[var(--green)]",
           },
           {
             icon: TrendingUp,
@@ -110,7 +111,7 @@ export default function Overview() {
             value: profitUplift,
             suffix: "%",
             decimals: 1,
-            color: "text-pink-300",
+            color: "text-[var(--burgundy-light)]",
           },
         ].map((stat, i) => (
           <motion.div
@@ -121,7 +122,7 @@ export default function Overview() {
           >
             <SpotlightCard className="p-5">
               <stat.icon size={16} className={stat.color} />
-              <div className="font-display mt-3 text-3xl font-semibold text-white">
+              <div className="font-display mt-3 text-3xl font-semibold text-[var(--text)]">
                 <AnimatedNumber value={stat.value} decimals={stat.decimals ?? 0} suffix={stat.suffix} prefix={stat.suffix === "%" ? "+" : ""} />
               </div>
               <div className="mt-1 text-[12.5px] text-[var(--text-dim)]">{stat.label}</div>
@@ -133,22 +134,30 @@ export default function Overview() {
       {/* Category + elasticity charts */}
       <section className="grid grid-cols-1 gap-5 pb-20 lg:grid-cols-2">
         <SpotlightCard className="p-6">
-          <h3 className="font-display text-sm font-semibold text-white">Catalog by category</h3>
+          <h3 className="font-display text-sm font-semibold text-[var(--text)]">Catalog by category</h3>
           <p className="mt-1 text-[12.5px] text-[var(--text-dim)]">
             Derived from product descriptions &mdash; no category field in the source data
           </p>
-          <div className="mt-5 h-64">
+          <div className="mt-5 h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData} layout="vertical" margin={{ left: 8, right: 16 }}>
+              <BarChart data={categoryData} layout="vertical" margin={{ left: 8, right: 20 }} barCategoryGap="28%">
                 <XAxis type="number" hide />
-                <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                  contentStyle={{ background: "#0a0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }}
-                  labelStyle={{ color: "#e7e9f5" }}
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={130}
+                  tick={{ fill: "#7d5d61", fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={14}>
+                <Tooltip
+                  cursor={{ fill: "rgba(122,27,49,0.04)" }}
+                  contentStyle={{ background: "#ffffff", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}
+                  labelStyle={{ color: "var(--text)" }}
+                />
+                <Bar dataKey="count" radius={[0, 6, 6, 0]} barSize={12}>
                   {categoryData.map((_, i) => (
-                    <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} fillOpacity={0.85} />
+                    <Cell key={i} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} fillOpacity={0.9} />
                   ))}
                 </Bar>
               </BarChart>
@@ -157,26 +166,26 @@ export default function Overview() {
         </SpotlightCard>
 
         <SpotlightCard className="p-6">
-          <h3 className="font-display text-sm font-semibold text-white">Fitted price elasticity distribution</h3>
+          <h3 className="font-display text-sm font-semibold text-[var(--text)]">Fitted price elasticity distribution</h3>
           <p className="mt-1 text-[12.5px] text-[var(--text-dim)]">
             Median {summary?.elasticity_median.toFixed(2)} &middot; mean {summary?.elasticity_mean.toFixed(2)} &mdash; from real log-log regression fits
           </p>
-          <div className="mt-5 h-64">
+          <div className="mt-5 h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={histData}>
                 <XAxis
                   dataKey="mid"
                   tickFormatter={(v) => v.toFixed(1)}
-                  tick={{ fill: "#8b90ac", fontSize: 10 }}
-                  axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                  tick={{ fill: "#7d5d61", fontSize: 10 }}
+                  axisLine={{ stroke: "var(--border)" }}
                   tickLine={false}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                  contentStyle={{ background: "#0a0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }}
+                  cursor={{ fill: "rgba(122,27,49,0.04)" }}
+                  contentStyle={{ background: "#ffffff", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}
                   labelFormatter={(v) => `elasticity ≈ ${Number(v).toFixed(2)}`}
                 />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]} fill="#a78bfa" fillOpacity={0.8} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]} fill="var(--burgundy)" fillOpacity={0.85} />
               </BarChart>
             </ResponsiveContainer>
           </div>

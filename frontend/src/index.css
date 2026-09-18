@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #05060d;
-  --bg-elev: #0a0d1a;
-  --card: rgba(255, 255, 255, 0.035);
-  --card-hover: rgba(255, 255, 255, 0.06);
-  --border: rgba(255, 255, 255, 0.09);
-  --border-hover: rgba(255, 255, 255, 0.18);
-  --text: #e7e9f5;
-  --text-dim: #8b90ac;
-  --text-dimmer: #565b78;
-  --cyan: #22d3ee;
-  --violet: #a78bfa;
-  --magenta: #f472b6;
-  --green: #34d399;
-  --red: #fb7185;
-  --amber: #fbbf24;
+  --bg: #faf6f4;
+  --bg-elev: #ffffff;
+  --card: #ffffff;
+  --card-hover: #fbf1f2;
+  --border: #e7d7da;
+  --border-hover: #d6b2b9;
+  --text: #2b1216;
+  --text-dim: #7d5d61;
+  --text-dimmer: #ab9093;
+  --burgundy: #7a1b31;
+  --burgundy-dark: #4f0f1f;
+  --burgundy-light: #a8445b;
+  --gold: #a9812e;
+  --gold-light: #cba54f;
+  --green: #2f6d4f;
+  --red: #a13a3a;
 }
 
 * {
@@ -37,7 +38,7 @@ body {
 }
 
 h1, h2, h3, h4, .font-display {
-  font-family: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+  font-family: "Playfair Display", "Inter", ui-serif, serif;
 }
 
 .font-mono-tech {
@@ -45,8 +46,8 @@ h1, h2, h3, h4, .font-display {
 }
 
 ::selection {
-  background: rgba(167, 139, 250, 0.35);
-  color: #fff;
+  background: rgba(122, 27, 49, 0.16);
+  color: var(--burgundy-dark);
 }
 
 ::-webkit-scrollbar {
@@ -57,16 +58,16 @@ h1, h2, h3, h4, .font-display {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #23263b;
+  background: #dcc2c6;
   border-radius: 8px;
   border: 2px solid var(--bg);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #34385a;
+  background: var(--burgundy-light);
 }
 
 .text-gradient {
-  background: linear-gradient(90deg, #67e8f9, #a78bfa 45%, #f472b6 90%);
+  background: linear-gradient(100deg, var(--burgundy) 15%, var(--gold) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -75,22 +76,22 @@ h1, h2, h3, h4, .font-display {
 .glass {
   background: var(--card);
   border: 1px solid var(--border);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 2px rgba(43, 18, 22, 0.04), 0 8px 24px -12px rgba(43, 18, 22, 0.08);
 }
 
 .glass-hover {
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 .glass-hover:hover {
   background: var(--card-hover);
   border-color: var(--border-hover);
+  box-shadow: 0 2px 4px rgba(43, 18, 22, 0.05), 0 14px 32px -14px rgba(43, 18, 22, 0.14);
 }
 
 .grid-bg {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(rgba(122, 27, 49, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(122, 27, 49, 0.05) 1px, transparent 1px);
   background-size: 44px 44px;
 }
 
@@ -115,7 +116,7 @@ input[type="range"] {
   appearance: none;
   height: 4px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--cyan), var(--violet));
+  background: linear-gradient(90deg, var(--burgundy), var(--gold-light));
   outline: none;
 }
 input[type="range"]::-webkit-slider-thumb {
@@ -125,19 +126,20 @@ input[type="range"]::-webkit-slider-thumb {
   height: 16px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25), 0 0 12px rgba(167, 139, 250, 0.6);
+  border: 2px solid var(--burgundy);
+  box-shadow: 0 0 0 4px rgba(122, 27, 49, 0.12), 0 2px 6px rgba(43, 18, 22, 0.25);
   cursor: pointer;
   transition: box-shadow 0.2s ease;
 }
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 0 6px rgba(167, 139, 250, 0.3), 0 0 18px rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 0 6px rgba(122, 27, 49, 0.16), 0 2px 8px rgba(43, 18, 22, 0.3);
 }
 input[type="range"]::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  border: none;
+  border: 2px solid var(--burgundy);
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.25), 0 0 12px rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 0 4px rgba(122, 27, 49, 0.12), 0 2px 6px rgba(43, 18, 22, 0.25);
   cursor: pointer;
 }

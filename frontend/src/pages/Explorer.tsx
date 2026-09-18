@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Lock, Sparkles } from "lucide-react";
+import { Search, Lock, Gem } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -109,20 +109,20 @@ export default function Explorer() {
       <div className="grid grid-cols-1 gap-5 py-10 lg:grid-cols-[300px_1fr]">
         {/* Sidebar: product list */}
         <SpotlightCard className="h-fit lg:sticky lg:top-24">
-          <div className="border-b border-white/[0.07] p-4">
+          <div className="border-b border-[var(--border)] p-4">
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-dimmer)]" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search products..."
-                className="w-full rounded-lg border border-white/10 bg-white/[0.03] py-2 pl-8 pr-3 text-[13px] text-white placeholder:text-[var(--text-dimmer)] outline-none focus:border-violet-400/50"
+                className="w-full rounded-lg border border-[var(--border)] bg-white py-2 pl-8 pr-3 text-[13px] text-[var(--text)] placeholder:text-[var(--text-dimmer)] outline-none focus:border-[var(--burgundy-light)]"
               />
             </div>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-2.5 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-[13px] text-white outline-none focus:border-violet-400/50"
+              className="mt-2.5 w-full rounded-lg border border-[var(--border)] bg-white px-3 py-2 text-[13px] text-[var(--text)] outline-none focus:border-[var(--burgundy-light)]"
             >
               <option value="All">All categories</option>
               {categories.map((c) => (
@@ -139,11 +139,11 @@ export default function Explorer() {
                 onClick={() => setSelected(p)}
                 className={`mb-1 flex w-full flex-col rounded-lg px-3 py-2 text-left transition-colors ${
                   selected?.stock_code === p.stock_code
-                    ? "bg-gradient-to-r from-cyan-500/15 to-violet-500/15 ring-1 ring-violet-400/30"
-                    : "hover:bg-white/[0.04]"
+                    ? "bg-[var(--burgundy)]/[0.08] ring-1 ring-[var(--burgundy)]/25"
+                    : "hover:bg-[var(--card-hover)]"
                 }`}
               >
-                <span className="truncate text-[12.5px] font-medium text-white">{p.description}</span>
+                <span className="truncate text-[12.5px] font-medium text-[var(--text)]">{p.description}</span>
                 <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[var(--text-dimmer)]">
                   £{p.base_price.toFixed(2)} &middot; e={p.elasticity.toFixed(2)}
                   {p.held_out_from_training && <Lock size={9} />}
@@ -170,11 +170,11 @@ export default function Explorer() {
                 <SpotlightCard className="p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <h2 className="font-display text-xl font-semibold text-white">{selected.description}</h2>
+                      <h2 className="font-display text-xl font-semibold text-[var(--text)]">{selected.description}</h2>
                       <p className="mt-1 text-[12.5px] text-[var(--text-dim)]">
                         {selected.stock_code} &middot; {selected.category}{" "}
                         {selected.held_out_from_training && (
-                          <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-[10px] text-amber-300">
+                          <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-0.5 text-[10px] text-[var(--gold)]">
                             <Lock size={9} /> held out from training
                           </span>
                         )}
@@ -183,26 +183,26 @@ export default function Explorer() {
                     <div className="grid grid-cols-3 gap-4 text-right">
                       <div>
                         <div className="text-[11px] text-[var(--text-dimmer)]">Base price</div>
-                        <div className="font-mono-tech text-sm text-white">£{selected.base_price.toFixed(2)}</div>
+                        <div className="font-mono-tech text-sm text-[var(--text)]">£{selected.base_price.toFixed(2)}</div>
                       </div>
                       <div>
                         <div className="text-[11px] text-[var(--text-dimmer)]">Elasticity</div>
-                        <div className="font-mono-tech text-sm text-white">{selected.elasticity.toFixed(2)}</div>
+                        <div className="font-mono-tech text-sm text-[var(--text)]">{selected.elasticity.toFixed(2)}</div>
                       </div>
                       <div>
                         <div className="text-[11px] text-[var(--text-dimmer)]">Transactions</div>
-                        <div className="font-mono-tech text-sm text-white">{selected.n_transactions.toLocaleString()}</div>
+                        <div className="font-mono-tech text-sm text-[var(--text)]">{selected.n_transactions.toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
 
                   {/* Recommendation */}
-                  <div className="mt-6 flex flex-wrap items-end justify-between gap-6 rounded-xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10 p-5">
+                  <div className="mt-6 flex flex-wrap items-end justify-between gap-6 rounded-xl border border-[var(--burgundy)]/15 bg-gradient-to-br from-[var(--burgundy)]/[0.06] via-transparent to-[var(--gold)]/[0.08] p-5">
                     <div>
-                      <div className="flex items-center gap-1.5 text-[11.5px] text-violet-300">
-                        <Sparkles size={12} /> PPO recommendation
+                      <div className="flex items-center gap-1.5 text-[11.5px] text-[var(--burgundy)]">
+                        <Gem size={12} /> PPO recommendation
                       </div>
-                      <div className="font-display mt-1 text-4xl font-semibold text-white">
+                      <div className="font-display mt-1 text-4xl font-semibold text-[var(--text)]">
                         {recommendation ? (
                           <AnimatedNumber value={recommendation.recommended_price} decimals={2} prefix="£" duration={0.5} />
                         ) : (
@@ -214,8 +214,8 @@ export default function Explorer() {
                       <div
                         className={`rounded-full px-3 py-1 text-[13px] font-semibold ${
                           recommendation.pct_vs_base >= 0
-                            ? "bg-emerald-400/15 text-emerald-300"
-                            : "bg-rose-400/15 text-rose-300"
+                            ? "bg-[var(--green)]/10 text-[var(--green)]"
+                            : "bg-[var(--red)]/10 text-[var(--red)]"
                         }`}
                       >
                         {recommendation.pct_vs_base >= 0 ? "+" : ""}
@@ -235,35 +235,35 @@ export default function Explorer() {
 
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                   <SpotlightCard className="p-6">
-                    <h3 className="font-display text-sm font-semibold text-white">Expected profit vs. price</h3>
+                    <h3 className="font-display text-sm font-semibold text-[var(--text)]">Expected profit vs. price</h3>
                     <div className="mt-4 h-56">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={curve}>
                           <XAxis
                             dataKey="price"
                             tickFormatter={(v) => `£${v.toFixed(0)}`}
-                            tick={{ fill: "#8b90ac", fontSize: 10 }}
-                            axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                            tick={{ fill: "#7d5d61", fontSize: 10 }}
+                            axisLine={{ stroke: "var(--border)" }}
                             tickLine={false}
                           />
                           <YAxis hide />
                           <Tooltip
-                            contentStyle={{ background: "#0a0d1a", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, fontSize: 12 }}
+                            contentStyle={{ background: "#ffffff", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12 }}
                             formatter={(v) => [`£${Number(v).toFixed(2)}`, "profit"]}
                             labelFormatter={(v) => `price £${Number(v).toFixed(2)}`}
                           />
-                          <Line type="monotone" dataKey="profit" stroke="#22d3ee" strokeWidth={2} dot={false} />
+                          <Line type="monotone" dataKey="profit" stroke="var(--burgundy)" strokeWidth={2} dot={false} />
                           {recommendation && (
-                            <ReferenceLine x={recommendation.recommended_price} stroke="#f472b6" strokeDasharray="4 4" />
+                            <ReferenceLine x={recommendation.recommended_price} stroke="var(--gold)" strokeDasharray="4 4" />
                           )}
-                          {selected && <ReferenceLine x={selected.base_price} stroke="#8b90ac" strokeDasharray="2 3" />}
+                          {selected && <ReferenceLine x={selected.base_price} stroke="#ab9093" strokeDasharray="2 3" />}
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
                   </SpotlightCard>
 
                   <SpotlightCard className="p-6">
-                    <h3 className="font-display text-sm font-semibold text-white">Why this price? (SHAP)</h3>
+                    <h3 className="font-display text-sm font-semibold text-[var(--text)]">Why this price? (SHAP)</h3>
                     <p className="mt-1 text-[11.5px] text-[var(--text-dimmer)]">
                       base {explanation?.base_value.toFixed(3)} &rarr; decision {explanation?.prediction.toFixed(3)}
                     </p>
@@ -279,19 +279,22 @@ export default function Explorer() {
                             <div key={f.name}>
                               <div className="mb-1 flex items-center justify-between text-[11.5px]">
                                 <span className="text-[var(--text-dim)]">{f.label}</span>
-                                <span className={`font-mono-tech ${positive ? "text-cyan-300" : "text-pink-300"}`}>
+                                <span className={`font-mono-tech ${positive ? "text-[var(--burgundy)]" : "text-[var(--gold)]"}`}>
                                   {positive ? "+" : ""}
                                   {f.shap_value.toFixed(4)}
                                 </span>
                               </div>
-                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.05]">
+                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]/50">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${widthPct}%` }}
                                   transition={{ duration: 0.5, ease: "easeOut" }}
-                                  className={`h-full rounded-full ${
-                                    positive ? "bg-gradient-to-r from-cyan-400 to-cyan-300" : "bg-gradient-to-r from-pink-400 to-pink-300"
-                                  }`}
+                                  className="h-full rounded-full"
+                                  style={{
+                                    background: positive
+                                      ? "linear-gradient(90deg, var(--burgundy), var(--burgundy-light))"
+                                      : "linear-gradient(90deg, var(--gold), var(--gold-light))",
+                                  }}
                                 />
                               </div>
                             </div>
@@ -304,8 +307,8 @@ export default function Explorer() {
             )}
           </>
           {loadingDecision && (
-            <div className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full border border-white/10 bg-[#0a0d1a]/90 px-3.5 py-2 text-[11.5px] text-[var(--text-dim)] backdrop-blur">
-              <span className="h-1.5 w-1.5 animate-ping rounded-full bg-violet-400" />
+            <div className="fixed bottom-6 right-6 flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/95 px-3.5 py-2 text-[11.5px] text-[var(--text-dim)] shadow-lg backdrop-blur">
+              <span className="h-1.5 w-1.5 animate-ping rounded-full bg-[var(--burgundy)]" />
               recomputing policy decision…
             </div>
           )}
@@ -334,7 +337,7 @@ function SliderControl({
     <div>
       <div className="mb-2 flex items-center justify-between text-[12.5px]">
         <span className="text-[var(--text-dim)]">{label}</span>
-        <span className="font-mono-tech text-white">{value.toFixed(2)}</span>
+        <span className="font-mono-tech text-[var(--text)]">{value.toFixed(2)}</span>
       </div>
       <input
         type="range"
