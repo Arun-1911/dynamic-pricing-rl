@@ -14,12 +14,22 @@ What's simulated (no such data exists in the source dataset):
     - competitor price and its week-to-week drift
     - inventory level and replenishment
     - demand noise
+
+Inventory model: storage holds up to STORAGE_WEEKS weeks of typical demand and
+the retailer restocks one week of typical demand every week (ordering to the
+historical run-rate). Selling at the base price is therefore sustainable, so
+supply only binds when a strategy deliberately over-sells (deep discounts).
+
+Reward is weekly gross profit normalised by the product's base revenue, i.e.
+exactly the quantity the evaluation reports; there are no extra shaping terms.
 """
 
 import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 import pandas as pd
+
+STORAGE_WEEKS = 2.0
 
 
 class PricingEnv(gym.Env):
@@ -116,7 +126,7 @@ class PricingEnv(gym.Env):
         noise = self.np_random.normal(1.0, 0.1)
         demand = max(0.0, base_demand_calc * competitor_factor * noise)
 
-        capacity = self.inventory * self.base_demand * 2.0
+        capacity = self.inventory * STORAGE_WEEKS * self.base_demand
         actual_sales = min(demand, capacity)
 
         revenue = new_price * actual_sales
@@ -129,13 +139,9 @@ class PricingEnv(gym.Env):
         base_revenue = max(self.base_price * self.base_demand, 1e-6)
         reward = profit / base_revenue
 
-        if demand > capacity:
-            reward -= (demand - capacity) / demand * 1.0
-        if actual_sales < capacity * 0.3:
-            reward -= 0.5
-
-        inventory_used = actual_sales / (self.base_demand * 2.0)
-        self.inventory = float(np.clip(self.inventory + 0.1 - inventory_used, 0.0, 1.0))
+        inventory_used = actual_sales / (STORAGE_WEEKS * self.base_demand)
+        restock = 1.0 / STORAGE_WEEKS
+        self.inventory = float(np.clip(self.inventory + restock - inventory_used, 0.0, 1.0))
         self.competitor_ratio = float(np.clip(
             self.competitor_ratio * self.np_random.uniform(0.98, 1.02), 0.5, 1.5
         ))

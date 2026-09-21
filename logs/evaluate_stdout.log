@@ -1,52 +1,107 @@
 Evaluating on 727 held-out products, 10 episodes each
+  evaluated 50/727 products...
   evaluated 100/727 products...
+  evaluated 150/727 products...
   evaluated 200/727 products...
+  evaluated 250/727 products...
   evaluated 300/727 products...
+  evaluated 350/727 products...
   evaluated 400/727 products...
+  evaluated 450/727 products...
   evaluated 500/727 products...
+  evaluated 550/727 products...
   evaluated 600/727 products...
+  evaluated 650/727 products...
   evaluated 700/727 products...
 
 === RESULTS ===
 {
   "ppo": {
-    "mean_revenue_per_product": 953.4948790068546,
-    "std_revenue_per_product": 1870.0749132278008,
-    "total_revenue": 693190.7770379826,
-    "mean_profit_per_product": 595.9572001711551,
-    "std_profit_per_product": 1162.746735690954,
-    "total_profit": 433260.8845244296
+    "mean_revenue_per_product": 3041.550522569526,
+    "std_revenue_per_product": 6167.871947582703,
+    "total_revenue": 2211207.2299080454,
+    "mean_profit_per_product": 1535.5321421870196,
+    "std_profit_per_product": 3079.4630865675304,
+    "total_profit": 1116331.8673699633,
+    "supply_capped_share": 0.004782562691778648
   },
   "static_base_price": {
-    "mean_revenue_per_product": 719.4951823444007,
-    "std_revenue_per_product": 1440.9827086177456,
-    "total_revenue": 523072.9975643796,
-    "mean_profit_per_product": 359.7475911722004,
-    "std_profit_per_product": 720.4913543088728,
-    "total_profit": 261536.4987821898,
-    "revenue_uplift_vs_ppo_pct": 32.52276073621349,
-    "profit_uplift_vs_ppo_pct": 65.65981671462751
+    "mean_revenue_per_product": 3025.3142717695173,
+    "std_revenue_per_product": 6070.599120509278,
+    "total_revenue": 2199403.475576439,
+    "mean_profit_per_product": 1512.6571358847586,
+    "std_profit_per_product": 3035.299560254639,
+    "total_profit": 1099701.7377882195,
+    "supply_capped_share": 0.050412654745529584,
+    "revenue_uplift_vs_ppo_pct": 0.5366798071696604,
+    "profit_uplift_vs_ppo_pct": 1.5122400020201188,
+    "revenue_uplift_ci95_pct": [
+      0.16387101048925323,
+      0.8739836413116762
+    ],
+    "profit_uplift_ci95_pct": [
+      1.1762734972354016,
+      1.986943082947941
+    ]
   },
   "undercut_competitor_5pct": {
-    "mean_revenue_per_product": 684.9142243770189,
-    "std_revenue_per_product": 1381.9722540809614,
-    "total_revenue": 497932.6411220924,
-    "mean_profit_per_product": 325.1691721304992,
-    "std_profit_per_product": 661.8096626608332,
-    "total_profit": 236397.9881388727,
-    "revenue_uplift_vs_ppo_pct": 39.2137650337354,
-    "profit_uplift_vs_ppo_pct": 83.27604559388604
+    "mean_revenue_per_product": 2840.8291242696987,
+    "std_revenue_per_product": 5610.128857665204,
+    "total_revenue": 2065282.773344071,
+    "mean_profit_per_product": 1340.5196570335772,
+    "std_profit_per_product": 2663.5299940079403,
+    "total_profit": 974557.7906634107,
+    "supply_capped_share": 0.5645222727753677,
+    "revenue_uplift_vs_ppo_pct": 7.065592104256786,
+    "profit_uplift_vs_ppo_pct": 14.547528947466809,
+    "revenue_uplift_ci95_pct": [
+      6.15047888473198,
+      8.1898286628822
+    ],
+    "profit_uplift_ci95_pct": [
+      13.5889106592652,
+      15.780595610828415
+    ]
   },
   "elasticity_optimal_static": {
-    "mean_revenue_per_product": 606.8818252921616,
-    "std_revenue_per_product": 1160.5742383804456,
-    "total_revenue": 441203.086987401,
-    "mean_profit_per_product": 247.1342341199612,
-    "std_profit_per_product": 468.21969462848995,
-    "total_profit": 179666.58820521215,
-    "revenue_uplift_vs_ppo_pct": 57.11376404258417,
-    "profit_uplift_vs_ppo_pct": 141.14716534248782
+    "mean_revenue_per_product": 2444.757273073667,
+    "std_revenue_per_product": 4980.273066914127,
+    "total_revenue": 1777338.537524556,
+    "mean_profit_per_product": 953.9910463142289,
+    "std_profit_per_product": 1938.3473318623064,
+    "total_profit": 693551.4906704444,
+    "supply_capped_share": 0.6776028991641097,
+    "revenue_uplift_vs_ppo_pct": 24.41114527273873,
+    "profit_uplift_vs_ppo_pct": 60.95875827342311,
+    "revenue_uplift_ci95_pct": [
+      22.162275549743008,
+      26.86949033437701
+    ],
+    "profit_uplift_ci95_pct": [
+      53.218715074694046,
+      69.67488162318135
+    ]
   },
+  "tuned_static_oracle": {
+    "mean_revenue_per_product": 3011.137705087162,
+    "std_revenue_per_product": 6071.720196455096,
+    "total_revenue": 2189097.111598367,
+    "mean_profit_per_product": 1521.385793448454,
+    "std_profit_per_product": 3042.9616943040055,
+    "total_profit": 1106047.471837026,
+    "supply_capped_share": 0.04228124008041477,
+    "revenue_uplift_vs_ppo_pct": 1.0100108484239345,
+    "profit_uplift_vs_ppo_pct": 0.9298331034431984,
+    "revenue_uplift_ci95_pct": [
+      0.7651129266774437,
+      1.2145484976323133
+    ],
+    "profit_uplift_ci95_pct": [
+      0.8056243045187855,
+      1.043276115242501
+    ]
+  },
+  "oracle_ratio_mean": 1.030949105914718,
   "n_held_out_products": 727,
   "episodes_per_product": 10
 }

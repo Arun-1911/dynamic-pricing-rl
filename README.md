@@ -9,36 +9,26 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-A single PPO policy learns a pricing strategy across a real catalog of **4,851 products**, using per-product price elasticity fitted from actual transaction history rather than assumed values. Evaluated on 727 held-out products the policy never trained on, it beats a static-pricing baseline by **+32.5% revenue** and **+65.7% profit** — an honest, reproducible number, not a target.
+A single PPO policy learns a pricing strategy across a real catalog of **4,851 products**, using per-product price elasticity fitted from actual transaction history rather than assumed values. Evaluated on 727 held-out products the policy never trained on, it earns a small but statistically clear gain over static pricing: **+1.5% profit** (+0.5% revenue) versus never changing price, and **+0.9% profit** versus the best possible constant price for each product. These are simulation results and are reported with confidence intervals.
 
 ---
 
 ## Results
 
-PPO trained for 400,000 timesteps across 4,124 products, evaluated on **727 held-out products** it never saw during training (10 stochastic episodes each):
+PPO trained for 400,000 timesteps across 4,124 products, evaluated on **727 held-out products** it never saw during training (10 stochastic episodes each). Uplift is PPO's total over the baseline's total; brackets are 95% bootstrap intervals (resampling products).
 
-| Baseline | Revenue uplift | Profit uplift |
-|---|---|---|
-| Static base price (never change price) | **+32.5%** | **+65.7%** |
-| Undercut competitor by 5% (naive rule) | +39.2% | +83.3% |
-| Elasticity-optimal static price (classic monopoly formula, same elasticity data) | +57.1% | +141.1% |
+| Baseline | Revenue uplift | Profit uplift | Weeks limited by stock |
+|---|---|---|---|
+| Static base price (never change price) | **+0.5%** [0.2, 0.9] | **+1.5%** [1.2, 2.0] | 5.0% |
+| Best constant price per product (grid-searched in the simulator; an upper bound for any static price) | +1.0% [0.8, 1.2] | +0.9% [0.8, 1.0] | 4.2% |
+| Undercut competitor by 5% (naive rule) | +7.1% [6.2, 8.2] | +14.5% [13.6, 15.8] | 56.5% |
+| Elasticity-optimal static price (textbook monopoly formula) | +24.4% [22.2, 26.9] | +61.0% [53.2, 69.7] | 67.8% |
 
-Full numbers: [`reports/uplift_report.json`](reports/uplift_report.json) · per-product breakdown: [`reports/per_product_eval.csv`](reports/per_product_eval.csv)
+PPO itself is stock-limited in 0.5% of weeks. Full numbers: [`reports/uplift_report.json`](reports/uplift_report.json) · per-product breakdown: [`reports/per_product_eval.csv`](reports/per_product_eval.csv)
 
-The +32.5% figure (vs. simply never changing price) is the most defensible, easiest-to-verify result and the one worth leading with. The other two comparisons are real but need more context to present fairly — see below.
+**How to read this.** The catalog's base prices are the retailer's own historical prices, and against the fitted demand curves they are already close to the best constant price, so there is little for any pricing strategy to gain: even a per-product tuned constant price improves profit by only about 1% over the base price. PPO's edge over that oracle (+0.9% profit) comes from reacting to the competitor's price and to stock levels week by week. The large gaps against the last two baselines are not large RL gains. Those baselines cut prices, sell faster than the retailer restocks, and are stock-limited in more than half of all weeks; PPO avoids that.
 
-<details>
-<summary><b>Why the "elasticity-optimal static" baseline is the most interesting result</b></summary>
-
-<br>
-
-It's a *static* price computed once from the same fitted elasticity PPO can see, using the textbook constant-elasticity monopoly formula `price* = cost × e/(e+1)`. It should be the hardest baseline to beat — and yet it underperforms even the do-nothing baseline.
-
-Tracing individual product rollouts showed why: ~34% of held-out products get pushed to the environment's price bounds (0.7×–1.4× base price), because the formula optimizes only the isolated elasticity term and is blind to the competitor-price dynamic in the environment. Overpricing against a competitor sitting near parity triggers a steep, competitor-driven demand penalty the formula never sees coming. PPO, which observes competitor price every step, avoids that trap.
-
-That gap is the real value dynamic, context-aware pricing adds over "just know your elasticity."
-
-</details>
+**Sensitivity to the supply assumption.** Simulated uplift depends heavily on how inventory is modelled. In an exploratory run where restocking was set to about 20% of typical demand, sales were stock-limited in 96% of weeks under static pricing, and PPO showed a >30% revenue "uplift" simply by raising prices to ration scarce stock. That configuration is unrealistic and is not used. The default here restocks one week of typical demand per week, so selling at the base price is sustainable.
 
 ---
 
@@ -100,7 +90,8 @@ Resulting distribution: mean elasticity −2.65, median −2.31 (σ = 1.53) — 
 
 - **State** (7-dim): current price ratio, competitor price ratio, inventory level, recent demand ratio, elasticity, time in episode, category
 - **Action**: continuous price multiplier, 0.7×–1.4× base price
-- **Reward**: profit normalized by the product's own base revenue — so one policy sees comparable reward scale whether a product sells 2 units/week or 2,000/week — with penalties for stockouts and excess unsold inventory
+- **Reward**: weekly gross profit normalized by the product's own base revenue, so one policy sees comparable reward scale whether a product sells 2 units/week or 2,000/week. There are no extra shaping terms: the reward is exactly the profit that the evaluation reports
+- **Inventory**: storage holds up to two weeks of typical demand and one week of typical demand is restocked each week, so selling at the base price is sustainable. Over-selling (deep discounts) runs the stock down and caps later sales
 - **Training**: `reset()` samples a random product from the 4,124-product training split every episode, so the single trained policy generalizes across the catalog rather than overfitting to one item
 
 ### Explainability
@@ -115,9 +106,9 @@ Resulting distribution: mean elasticity −2.65, median −2.31 (σ = 1.53) — 
 | Price elasticity per product | Real — fitted via log-log regression on actual weekly price/quantity |
 | Demand response during RL training/eval | Simulated, using the real fitted elasticity as the demand curve's exponent |
 | Competitor pricing | Simulated — the dataset has no competitor data (single retailer) |
-| Inventory dynamics | Simulated — the dataset has no inventory/stock data |
+| Inventory dynamics | Simulated (restock = one week of typical demand per week) — the dataset has no inventory/stock data; results are sensitive to this assumption |
 | Cost / margin | Assumed at a flat 50% of base price — the dataset has no cost column |
-| Revenue uplift numbers | Measured in simulation, not a live A/B test |
+| Uplift numbers | Measured in simulation, not a live A/B test |
 
 The elasticity is genuinely fitted from real transactions, and the uplift numbers are honest outputs of that simulation. They are not, on their own, evidence of real-world revenue impact — that would require a live pricing experiment.
 
@@ -141,7 +132,7 @@ logs/             training run logs and learning curve
 cd pricing_rl
 python data_prep.py    # cleans transactions, fits elasticity -> data/products.csv
 python train.py        # trains PPO, 400k timesteps -> models/ppo_pricing.zip
-python evaluate.py     # evaluates vs baselines on held-out products -> reports/
+python evaluate.py     # evaluates vs baselines on held-out products (about 15 min) -> reports/
 ```
 
 ## License

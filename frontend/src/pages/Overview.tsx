@@ -99,7 +99,7 @@ export default function Overview() {
           },
           {
             icon: TrendingUp,
-            label: "Revenue uplift",
+            label: "Revenue vs. static price",
             value: revenueUplift,
             suffix: "%",
             decimals: 1,
@@ -107,7 +107,7 @@ export default function Overview() {
           },
           {
             icon: TrendingUp,
-            label: "Profit uplift",
+            label: "Profit vs. static price",
             value: profitUplift,
             suffix: "%",
             decimals: 1,

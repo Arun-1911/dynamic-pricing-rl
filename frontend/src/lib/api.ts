@@ -25,10 +25,11 @@ export interface Summary {
 }
 
 export interface UpliftReport {
-  ppo: { total_revenue: number; total_profit: number; mean_revenue_per_product: number };
+  ppo: { total_revenue: number; total_profit: number; mean_revenue_per_product: number; supply_capped_share: number };
   static_base_price: BaselineResult;
   undercut_competitor_5pct: BaselineResult;
   elasticity_optimal_static: BaselineResult;
+  tuned_static_oracle: BaselineResult;
   n_held_out_products: number;
   episodes_per_product: number;
 }
@@ -37,8 +38,11 @@ interface BaselineResult {
   total_revenue: number;
   total_profit: number;
   mean_revenue_per_product: number;
+  supply_capped_share: number;
   revenue_uplift_vs_ppo_pct: number;
   profit_uplift_vs_ppo_pct: number;
+  revenue_uplift_ci95_pct: [number, number];
+  profit_uplift_ci95_pct: [number, number];
 }
 
 export interface StateInput {

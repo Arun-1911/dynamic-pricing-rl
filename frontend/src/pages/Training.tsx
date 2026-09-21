@@ -12,16 +12,19 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { AlertTriangle } from "lucide-react";
+import { Info } from "lucide-react";
 import { api, type LearningPoint, type UpliftReport } from "../lib/api";
 import SpotlightCard from "../components/SpotlightCard";
 import PageTransition from "../components/PageTransition";
 
-const BASELINE_LABELS: Record<string, string> = {
-  static_base_price: "Static base price",
-  undercut_competitor_5pct: "Undercut competitor 5%",
-  elasticity_optimal_static: "Elasticity-optimal static",
-};
+const BASELINES = [
+  { key: "static_base_price", label: "Static base price" },
+  { key: "tuned_static_oracle", label: "Best constant price" },
+  { key: "undercut_competitor_5pct", label: "Undercut competitor 5%" },
+  { key: "elasticity_optimal_static", label: "Elasticity-optimal static" },
+] as const;
+
+const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
 export default function Training() {
   const [curve, setCurve] = useState<LearningPoint[]>([]);
@@ -33,8 +36,8 @@ export default function Training() {
   }, []);
 
   const barData = uplift
-    ? (["static_base_price", "undercut_competitor_5pct", "elasticity_optimal_static"] as const).map((key) => ({
-        name: BASELINE_LABELS[key],
+    ? BASELINES.map(({ key, label }) => ({
+        name: label,
         revenue: uplift[key].revenue_uplift_vs_ppo_pct,
         profit: uplift[key].profit_uplift_vs_ppo_pct,
       }))
@@ -46,15 +49,15 @@ export default function Training() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="font-display text-2xl font-semibold text-[var(--text)]">Training results</h1>
           <p className="mt-1 text-[13px] text-[var(--text-dim)]">
-            PPO trained for 400,000 timesteps across {uplift?.episodes_per_product ?? "…"} × {uplift?.n_held_out_products ?? "…"} held-out
-            evaluation episodes.
+            PPO trained for 400,000 timesteps and evaluated on {uplift?.n_held_out_products ?? "…"} held-out products,{" "}
+            {uplift?.episodes_per_product ?? "…"} episodes each.
           </p>
         </motion.div>
 
         <SpotlightCard className="p-6">
           <h3 className="font-display text-sm font-semibold text-[var(--text)]">Episode reward during training</h3>
           <p className="mt-1 text-[12.5px] text-[var(--text-dim)]">
-            Real learning curve &mdash; reward is profit normalized by each product's base revenue, minus stockout/excess-inventory penalties.
+            Real learning curve &mdash; reward is weekly gross profit normalized by each product's base revenue.
           </p>
           <div className="mt-5 h-72">
             <ResponsiveContainer width="100%" height="100%">
@@ -107,25 +110,31 @@ export default function Training() {
           </div>
         </SpotlightCard>
 
-        <SpotlightCard className="p-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={16} className="mt-0.5 shrink-0 text-[var(--gold)]" />
-            <div>
-              <h3 className="font-display text-sm font-semibold text-[var(--text)]">
-                Why "elasticity-optimal static" is the most interesting baseline
-              </h3>
-              <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-dim)]">
-                It's a static price computed once from the same fitted elasticity PPO can see, using the textbook
-                constant-elasticity monopoly formula <code className="font-mono-tech text-[var(--burgundy)]">price* = cost × e/(e+1)</code>.
-                It should be the hardest baseline to beat &mdash; yet it underperforms even the do-nothing baseline.
-                Tracing individual rollouts showed why: ~34% of held-out products get pushed to the price bounds because
-                the formula optimizes only the isolated elasticity term and is blind to the competitor-price dynamic in
-                the environment. PPO, which observes competitor price every step, avoids that trap. That gap is the real
-                value dynamic, context-aware pricing adds over "just know your elasticity."
-              </p>
+        {uplift && (
+          <SpotlightCard className="p-6">
+            <div className="flex items-start gap-3">
+              <Info size={16} className="mt-0.5 shrink-0 text-[var(--gold)]" />
+              <div>
+                <h3 className="font-display text-sm font-semibold text-[var(--text)]">How to read these numbers</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-dim)]">
+                  Against never changing the price, PPO gains {uplift.static_base_price.revenue_uplift_vs_ppo_pct.toFixed(1)}% revenue
+                  and {uplift.static_base_price.profit_uplift_vs_ppo_pct.toFixed(1)}% profit. That gain is small because the catalog's
+                  base prices are the retailer's own historical prices and are already close to the best constant price: even the best
+                  constant price per product, found by grid search inside the simulator, improves profit only slightly over the base
+                  price. PPO still edges out that oracle by {uplift.tuned_static_oracle.profit_uplift_vs_ppo_pct.toFixed(1)}% profit by
+                  reacting to competitor price and stock levels.
+                </p>
+                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-dim)]">
+                  The larger gaps against the last two baselines are not large gains from learning. Those strategies cut prices and
+                  sell faster than the retailer restocks, so their sales were limited by stock in{" "}
+                  {pct(uplift.undercut_competitor_5pct.supply_capped_share)} and {pct(uplift.elasticity_optimal_static.supply_capped_share)} of
+                  weeks, against {pct(uplift.ppo.supply_capped_share)} for PPO. All results are simulated (competitor price and inventory
+                  are modelled) and depend on the inventory assumption.
+                </p>
+              </div>
             </div>
-          </div>
-        </SpotlightCard>
+          </SpotlightCard>
+        )}
       </div>
     </PageTransition>
   );
