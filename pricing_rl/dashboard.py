@@ -163,7 +163,7 @@ def main():
             "Value": [f"{v:.3f}" for v in result["feature_values"]],
             "SHAP contribution": [f"{v:+.4f}" for v in result["shap_values"]],
         })
-        st.dataframe(detail, hide_index=True, use_container_width=True)
+        st.dataframe(detail, hide_index=True, width="stretch")
 
 
 if __name__ == "__main__":
