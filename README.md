@@ -2,7 +2,7 @@
 
 **A PPO reinforcement-learning pricing engine trained on real e-commerce transaction data, with SHAP explainability and an interactive dashboard.**
 
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/stable--baselines3-PPO-EE4C2C?logo=pytorch&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
@@ -34,7 +34,7 @@ PPO itself is stock-limited in 0.5% of weeks. Full numbers: [`reports/uplift_rep
 
 ## Quick start
 
-Run the dashboard against the already-trained model — no retraining required.
+Run the dashboard against the already-trained model — no retraining required. Developed and tested with Python 3.13 and Node 24 (other versions are untested).
 
 ```bash
 # 1. backend — serves the trained PPO policy + SHAP explainer
@@ -48,6 +48,13 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+
+If port 8000 is already taken, run the backend on another port and tell the frontend where it is (add the frontend's origin to `CORS_ORIGINS` if you also change its port):
+
+```bash
+uvicorn backend.main:app --port 8010
+VITE_API_URL=http://127.0.0.1:8010 npm run dev      # in frontend/ (PowerShell: $env:VITE_API_URL="http://127.0.0.1:8010"; npm run dev)
+```
 
 ## Dashboard
 
@@ -67,6 +74,8 @@ React (Vite, TypeScript, Tailwind, Framer Motion, Recharts) talking to a FastAPI
 
 [**Online Retail II**](https://archive.ics.uci.edu/dataset/502/online+retail+ii) (UCI Machine Learning Repository, CC BY 4.0) — a real transaction log from a UK-based online gift-ware retailer, Dec 2009–Dec 2011.
 
+> Chen, D. (2012). *Online Retail II* [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5CG6D
+
 - 1,067,371 raw transaction rows (`Invoice, StockCode, Description, Quantity, InvoiceDate, Price, Customer ID, Country`)
 - After removing cancellations, non-positive price/quantity rows, and non-product service codes (postage, bank charges, manual adjustments): **4,851 real unique products**, 1,031,503 clean transaction rows
 - No `category` column in the source data — categories are derived from the free-text `Description` field via keyword rules ([`pricing_rl/data_prep.py`](pricing_rl/data_prep.py)); treat these as heuristic labels, not ground truth
@@ -84,6 +93,8 @@ For each product, transactions are aggregated to weekly (quantity-weighted price
 
 Resulting distribution: mean elasticity −2.65, median −2.31 (σ = 1.53) — economically plausible for discretionary gift-ware.
 
+**How reliable are the fits?** Only moderately. Among the 3,442 directly fitted products the median R² is 0.30 (quartiles 0.16 and 0.47); half have R² below 0.30 and 16% below 0.10. The regression uses price alone, so it cannot separate price effects from promotions, seasonality, or the mix of wholesale and retail buyers in the transactions. Treat each product's elasticity as a rough estimate; the simulated demand curves, and therefore every uplift number above, inherit that noise. Per-product `r2` is stored in `data/products.csv`.
+
 ### Environment
 
 [`pricing_rl/environment.py`](pricing_rl/environment.py) — a Gymnasium env where each episode samples one real product (its real elasticity, base price, and category) and runs 52 weekly pricing decisions.
@@ -96,7 +107,7 @@ Resulting distribution: mean elasticity −2.65, median −2.31 (σ = 1.53) — 
 
 ### Explainability
 
-[`pricing_rl/explain.py`](pricing_rl/explain.py) treats the trained policy as a black-box function (`observation → price multiplier`) and explains it with SHAP's `KernelExplainer`, since the policy network isn't tree-based. Shapley additivity is verified on every explanation: `base_value + Σ shap_values == prediction`.
+[`pricing_rl/explain.py`](pricing_rl/explain.py) treats the trained policy as a black-box function (`observation → price multiplier`) and explains it with SHAP's `KernelExplainer`, since the policy network isn't tree-based. With only 7 input features every feature subset is enumerated exactly, so explanations are deterministic and Shapley additivity holds exactly: `base_value + Σ shap_values == prediction`. The background states are seeded, and the explainer is lock-protected so overlapping API requests cannot corrupt one another.
 
 ### What's real vs. simulated
 
@@ -120,6 +131,7 @@ The elasticity is genuinely fitted from real transactions, and the uplift number
 pricing_rl/       data prep, Gymnasium environment, PPO training, evaluation, SHAP explainer
 backend/          FastAPI service exposing the trained model + explainer to the frontend
 frontend/         React dashboard (Vite + TypeScript + Tailwind + Framer Motion + Recharts)
+tests/            pytest suite (data, environment, baselines, evaluation, SHAP, API)
 data/             source dataset, fitted per-product elasticity, train/test splits
 models/           trained PPO checkpoint
 reports/          uplift evaluation results
@@ -128,12 +140,22 @@ logs/             training run logs and learning curve
 
 ## Reproducing the training run
 
+Run from the repository root; all paths are resolved relative to the repo, so it works wherever it is cloned.
+
 ```bash
-cd pricing_rl
-python data_prep.py    # cleans transactions, fits elasticity -> data/products.csv
-python train.py        # trains PPO, 400k timesteps -> models/ppo_pricing.zip
-python evaluate.py     # evaluates vs baselines on held-out products (about 15 min) -> reports/
+python pricing_rl/data_prep.py    # cleans transactions, fits elasticity -> data/products.csv (about 6 min)
+python pricing_rl/train.py        # splits products 85/15, trains PPO for 400k timesteps -> models/ppo_pricing.zip (about 20 min)
+python pricing_rl/evaluate.py     # evaluates vs baselines on held-out products -> reports/ (about 15 min)
 ```
+
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+The suite runs against the real data, trained model and API (about 25 seconds): data integrity and train/test separation, environment dynamics and inventory behaviour, baseline policies, the evaluation statistics, SHAP additivity / determinism / thread-safety, and every API route including validation and error paths.
 
 ## License
 
