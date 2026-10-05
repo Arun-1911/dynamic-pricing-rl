@@ -4,3 +4,5 @@ __pycache__/
 node_modules/
 frontend/dist/
 *.log
+.pytest_cache/
+*.pkl

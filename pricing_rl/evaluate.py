@@ -17,6 +17,8 @@ Baselines:
 """
 
 import json
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from stable_baselines3 import PPO
@@ -24,9 +26,10 @@ from stable_baselines3 import PPO
 from environment import PricingEnv
 from baselines import BASELINES
 
-DATA_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data"
-MODEL_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\models"
-REPORTS_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\reports"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+MODEL_DIR = ROOT / "models"
+REPORTS_DIR = ROOT / "reports"
 
 EPISODES_PER_PRODUCT = 10
 SEED = 123
@@ -86,18 +89,17 @@ def bootstrap_uplift_ci(ppo_vals, base_vals, rng):
 
 
 def main():
-    import os
     import sys
-    os.makedirs(REPORTS_DIR, exist_ok=True)
+    REPORTS_DIR.mkdir(exist_ok=True)
 
-    test_products = pd.read_csv(f"{DATA_DIR}/test_products.csv")
+    test_products = pd.read_csv(DATA_DIR / "test_products.csv")
     limit = int(sys.argv[1]) if len(sys.argv) > 1 else None  # quick smoke test; writes nothing
     if limit:
         test_products = test_products.head(limit)
     print(f"Evaluating on {len(test_products)} held-out products, "
           f"{EPISODES_PER_PRODUCT} episodes each", flush=True)
 
-    model = PPO.load(f"{MODEL_DIR}/ppo_pricing")
+    model = PPO.load(str(MODEL_DIR / "ppo_pricing"))
     names = ["ppo", *BASELINES.keys(), "tuned_static_oracle"]
     revenue = {n: [] for n in names}
     profit = {n: [] for n in names}
@@ -127,7 +129,7 @@ def main():
             print(f"  evaluated {i + 1}/{len(test_products)} products...", flush=True)
 
     if not limit:
-        pd.DataFrame(per_product_rows).to_csv(f"{REPORTS_DIR}/per_product_eval.csv", index=False)
+        pd.DataFrame(per_product_rows).to_csv(REPORTS_DIR / "per_product_eval.csv", index=False)
 
     rng = np.random.default_rng(0)
     summary = {}
@@ -158,7 +160,7 @@ def main():
     summary["episodes_per_product"] = EPISODES_PER_PRODUCT
 
     if not limit:
-        with open(f"{REPORTS_DIR}/uplift_report.json", "w") as f:
+        with open(REPORTS_DIR / "uplift_report.json", "w") as f:
             json.dump(summary, f, indent=2)
 
     print("\n=== RESULTS ===", flush=True)

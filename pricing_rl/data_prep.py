@@ -13,13 +13,16 @@ Output: data/products.csv, one row per real product, with:
 """
 
 import re
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-RAW_XLSX = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data\online_retail_II.xlsx"
-OUT_CSV = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data\products.csv"
-OUT_TX = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data\clean_transactions.pkl"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+RAW_XLSX = DATA_DIR / "online_retail_II.xlsx"
+OUT_CSV = DATA_DIR / "products.csv"
 
 # Ordered keyword -> category rules. First match wins. This is a heuristic
 # label derived from free-text Description, not a ground-truth taxonomy —
@@ -161,7 +164,6 @@ def main():
     products = products.sort_values("n_transactions", ascending=False).reset_index(drop=True)
 
     products.to_csv(OUT_CSV, index=False)
-    df.to_pickle(OUT_TX)
 
     print(f"\nSaved {len(products):,} products to {OUT_CSV}")
     print("\nelasticity_source breakdown:")

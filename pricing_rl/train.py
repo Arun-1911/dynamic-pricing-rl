@@ -8,7 +8,8 @@ reported uplift reflects generalization to unseen products, not
 memorization of the training set.
 """
 
-import numpy as np
+from pathlib import Path
+
 import pandas as pd
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
@@ -36,9 +37,10 @@ class EpisodeLogCallback(BaseCallback):
                 })
         return True
 
-DATA_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data"
-MODEL_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\models"
-LOG_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\logs"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+MODEL_DIR = ROOT / "models"
+LOG_DIR = ROOT / "logs"
 
 TOTAL_TIMESTEPS = 400_000
 SEED = 42
@@ -46,19 +48,17 @@ TEST_FRACTION = 0.15
 
 
 def main():
-    import os
-    os.makedirs(MODEL_DIR, exist_ok=True)
-    os.makedirs(LOG_DIR, exist_ok=True)
+    MODEL_DIR.mkdir(exist_ok=True)
+    LOG_DIR.mkdir(exist_ok=True)
 
-    products = pd.read_csv(f"{DATA_DIR}/products.csv")
-    rng = np.random.default_rng(SEED)
+    products = pd.read_csv(DATA_DIR / "products.csv")
     shuffled = products.sample(frac=1.0, random_state=SEED).reset_index(drop=True)
     n_test = int(len(shuffled) * TEST_FRACTION)
     test_products = shuffled.iloc[:n_test].reset_index(drop=True)
     train_products = shuffled.iloc[n_test:].reset_index(drop=True)
 
-    train_products.to_csv(f"{DATA_DIR}/train_products.csv", index=False)
-    test_products.to_csv(f"{DATA_DIR}/test_products.csv", index=False)
+    train_products.to_csv(DATA_DIR / "train_products.csv", index=False)
+    test_products.to_csv(DATA_DIR / "test_products.csv", index=False)
     print(f"Train products: {len(train_products)}, held-out test products: {len(test_products)}")
 
     def make_env():
@@ -88,11 +88,11 @@ def main():
     callback = EpisodeLogCallback()
     model.learn(total_timesteps=TOTAL_TIMESTEPS, progress_bar=False, log_interval=10, callback=callback)
 
-    model.save(f"{MODEL_DIR}/ppo_pricing")
-    print(f"Model saved to {MODEL_DIR}/ppo_pricing.zip")
+    model.save(str(MODEL_DIR / "ppo_pricing"))
+    print(f"Model saved to {MODEL_DIR / 'ppo_pricing.zip'}")
 
-    pd.DataFrame(callback.rows).to_csv(f"{LOG_DIR}/learning_curve.csv", index=False)
-    print(f"Learning curve saved to {LOG_DIR}/learning_curve.csv")
+    pd.DataFrame(callback.rows).to_csv(LOG_DIR / "learning_curve.csv", index=False)
+    print(f"Learning curve saved to {LOG_DIR / 'learning_curve.csv'}")
 
 
 if __name__ == "__main__":
