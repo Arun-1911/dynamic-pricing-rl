@@ -2,7 +2,6 @@
 
 :root {
   --bg: #faf6f4;
-  --bg-elev: #ffffff;
   --card: #ffffff;
   --card-hover: #fbf1f2;
   --border: #e7d7da;
@@ -101,14 +100,6 @@ h1, h2, h3, h4, .font-display {
 }
 .pulse-glow {
   animation: pulse-glow 2.4s ease-in-out infinite;
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-14px); }
-}
-.float-slow {
-  animation: float-slow 7s ease-in-out infinite;
 }
 
 input[type="range"] {
