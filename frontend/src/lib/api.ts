@@ -1,4 +1,4 @@
-const BASE = "http://127.0.0.1:8000";
+const BASE: string = import.meta.env.VITE_API_URL ?? "http://127.0.0.1:8000";
 
 export interface Product {
   stock_code: string;

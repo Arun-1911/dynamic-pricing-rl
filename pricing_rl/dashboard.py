@@ -5,30 +5,33 @@ policy's recommended price and a SHAP explanation of that recommendation.
 Run with: streamlit run dashboard.py
 """
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 from stable_baselines3 import PPO
 
-from environment import PricingEnv
+from environment import PricingEnv, STORAGE_WEEKS
 from explain import PricingExplainer, build_background, FEATURE_LABELS
 
-DATA_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\data"
-MODEL_DIR = r"C:\Projects\DynamicPriceRL\DynamicPriceRL\models"
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / "data"
+MODEL_DIR = ROOT / "models"
 
 st.set_page_config(page_title="Dynamic Pricing RL", layout="wide")
 
 
 @st.cache_resource
 def load_model():
-    return PPO.load(f"{MODEL_DIR}/ppo_pricing")
+    return PPO.load(str(MODEL_DIR / "ppo_pricing"))
 
 
 @st.cache_data
 def load_products():
-    products = pd.read_csv(f"{DATA_DIR}/products.csv")
-    test_codes = set(pd.read_csv(f"{DATA_DIR}/test_products.csv")["stock_code"])
+    products = pd.read_csv(DATA_DIR / "products.csv")
+    test_codes = set(pd.read_csv(DATA_DIR / "test_products.csv")["stock_code"])
     products["held_out_from_training"] = products["stock_code"].isin(test_codes)
     return products
 
@@ -60,7 +63,7 @@ def simulate_curve(row, competitor_ratio, inventory, cost_margin=0.5, price_low=
         np.minimum(1.5, 1.0 + (competitor_price - prices) / np.maximum(competitor_price, 1e-6) * 0.3),
     )
     demand = demand * factor
-    capacity = inventory * base_demand * 2.0
+    capacity = inventory * STORAGE_WEEKS * base_demand
     sales = np.minimum(demand, capacity)
     profit = (prices - cost) * sales
     revenue = prices * sales
@@ -138,7 +141,7 @@ def main():
     with col2:
         st.markdown("### Why this price? (SHAP)")
         explainer = load_explainer(model, products)
-        result = explainer.explain(obs, nsamples=100)
+        result = explainer.explain(obs)
 
         contrib = pd.DataFrame({
             "feature": [FEATURE_LABELS[n] for n in result["feature_names"]],

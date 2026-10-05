@@ -4,20 +4,21 @@ and catalog/training data to the React frontend.
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from stable_baselines3 import PPO
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "pricing_rl"))
 
-from environment import PricingEnv  # noqa: E402
+from environment import PricingEnv, STORAGE_WEEKS  # noqa: E402
 from explain import PricingExplainer, build_background, FEATURE_LABELS  # noqa: E402
 
 DATA_DIR = ROOT / "data"
@@ -29,7 +30,8 @@ app = FastAPI(title="Dynamic Pricing RL API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"]
+    + [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -50,10 +52,10 @@ with open(REPORTS_DIR / "uplift_report.json") as f:
 
 class StateInput(BaseModel):
     stock_code: str
-    competitor_ratio: float = 1.0
-    inventory: float = 1.0
-    demand_ratio: float = 1.0
-    time_norm: float = 0.0
+    competitor_ratio: float = Field(1.0, ge=0.5, le=1.5)
+    inventory: float = Field(1.0, ge=0.0, le=1.0)
+    demand_ratio: float = Field(1.0, ge=0.0, le=10.0)
+    time_norm: float = Field(0.0, ge=0.0, le=1.0)
 
 
 def _build_obs(payload: StateInput):
@@ -111,7 +113,12 @@ def categories():
 
 
 @app.get("/api/products")
-def list_products(category: str | None = None, q: str | None = None, limit: int = 50, offset: int = 0):
+def list_products(
+    category: str | None = None,
+    q: str | None = None,
+    limit: int = Query(50, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+):
     df = products_df
     if category and category != "All":
         df = df[df["category"] == category]
@@ -156,7 +163,7 @@ def recommend(payload: StateInput):
 @app.post("/api/explain")
 def explain(payload: StateInput):
     row, obs = _build_obs(payload)
-    result = explainer.explain(obs, nsamples=100)
+    result = explainer.explain(obs)
     return {
         "stock_code": payload.stock_code,
         "features": [
@@ -174,7 +181,12 @@ def explain(payload: StateInput):
 
 
 @app.get("/api/products/{stock_code}/curve")
-def price_curve(stock_code: str, competitor_ratio: float = 1.0, inventory: float = 1.0, cost_margin: float = 0.5):
+def price_curve(
+    stock_code: str,
+    competitor_ratio: float = Query(1.0, ge=0.5, le=1.5),
+    inventory: float = Query(1.0, ge=0.0, le=1.0),
+    cost_margin: float = Query(0.5, ge=0.0, lt=1.0),
+):
     row = products_df[products_df["stock_code"] == stock_code]
     if row.empty:
         raise HTTPException(status_code=404, detail="Unknown stock_code")
@@ -196,7 +208,7 @@ def price_curve(stock_code: str, competitor_ratio: float = 1.0, inventory: float
         np.minimum(1.5, 1.0 + (competitor_price - prices) / max(competitor_price, 1e-6) * 0.3),
     )
     demand = demand * factor
-    capacity = inventory * base_demand * 2.0
+    capacity = inventory * STORAGE_WEEKS * base_demand
     sales = np.minimum(demand, capacity)
     profit = (prices - cost) * sales
     revenue = prices * sales
@@ -208,7 +220,7 @@ def price_curve(stock_code: str, competitor_ratio: float = 1.0, inventory: float
 
 
 @app.get("/api/training/learning_curve")
-def learning_curve(max_points: int = 200):
+def learning_curve(max_points: int = Query(200, ge=2, le=5000)):
     df = pd.read_csv(LOGS_DIR / "learning_curve.csv")
     if len(df) > max_points:
         idx = np.linspace(0, len(df) - 1, max_points).astype(int)
